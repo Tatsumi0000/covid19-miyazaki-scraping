@@ -44,4 +44,4 @@ jobs:
         SELENIUM_HOST: localhost
         TZ: Asia/Tokyo
       run: |
-        poetry run ./Source/Scraping.py
+        poetry run ./source/Scraping.py
