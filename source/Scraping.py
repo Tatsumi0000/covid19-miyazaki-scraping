@@ -1,46 +1,65 @@
-from urllib import request
-from bs4 import BeautifulSoup
+"""
+@file: Scraping.py
+@author: Tatsumi0000
+@brief: 宮崎県のコロナ情報をスクレイピングする
+"""
+import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-
 class Scraping:
-    def __init__(self, url="https://www.pref.miyazaki.lg.jp/kansensho-taisaku/kenko/hoken/covid19.html"):
+    def __init__(self, url="https://www.pref.miyazaki.lg.jp/kansensho-taisaku/kenko/hoken/covid19.html", json_path = "./../data.json"):
+        """コンストラクタ
+        """
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('--headless')
         self.driver = webdriver.Chrome(options=self.options)
         self.url = url
+        self.json_path = json_path
+        self.json = json.load(open(json_path, 'r'))
+        self.covid_data = None
+        self.trs = None
         self.tbody = None
 
     def request_start(self):
+        """リクエスト
+        """
         self.driver.get(self.url)
 
     def get_table_data(self):
+        """
+        コロナ情報が入っているテーブルをタグを指定して取得
+        """
         tbody = self.driver.find_element_by_tag_name('tbody')
-        trs = tbody.find_elements(By.TAG_NAME, "tr")
-        # print()
-        return trs
+        self.trs = tbody.find_elements(By.TAG_NAME, "tr")
 
     def parse_table_data(self):
-        pass
+        """
+        テーブルの情報からコロナの
+        検査者数と陽性者数を取得し，タプルに格納
+        """
+        for i in range(len(self.trs)):
+            trs = self.trs[i]
+            ths = trs.find_elements(By.TAG_NAME, "th")
+            tds = trs.find_elements(By.TAG_NAME, "td")
+            if ths[0].text == '累計':
+                self.covid_data = (tds[3].text, tds[4].text)
+
+    def set_parse_table_data_to_json(self):
+        """
+        取得したコロナ情報をjsonに格納
+        """
+        self.json["main_summary"]["value"] = int(self.covid_data[0])
+        self.json["main_summary"]["children"][0]["value"] = int(self.covid_data[1])
+        json.dump(self.json, open(self.json_path, 'w'), indent=4, ensure_ascii = False)
+
 
 if __name__ == '__main__':
-    """
-    今後の流れいくらでもデータが増えても大丈夫なようにする必要あり
-    以下手順
-    1. trタグの中のthタグに累計があるとこまでfor文で進む（日時が進むにつれて累計の行番号が変わるため）
-    2. その行の中の合計（3）と陽性件数（4）のところまでインデックス指定で取り出す
-    3. 取出した値をdata.jsonに書き込む
-    4. 終わり
+    """メイン関数的なやつ
     """
     scraping = Scraping()
     scraping.request_start()
-    print(scraping.driver.page_source)
-    print("Hello")
-    trs = scraping.get_table_data()
-    tds = trs[2].find_elements(By.TAG_NAME, "td")
-    print(trs[2].text)
-    print()
-    print(tds[0].text)
-    print(len(trs))
+    scraping.get_table_data()
+    scraping.parse_table_data()
+    scraping.set_parse_table_data_to_json()
