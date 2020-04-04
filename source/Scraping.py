@@ -47,8 +47,7 @@ class Scraping:
                 self.covid_data = (tds[3].text, tds[4].text)
 
     def set_parse_table_data_to_json(self):
-        """
-        取得したコロナ情報をjsonに格納
+        """取得したコロナ情報をjsonに格納
         """
         self.json["main_summary"]["value"] = int(self.covid_data[0])
         self.json["main_summary"]["children"][0]["value"] = int(self.covid_data[1])
