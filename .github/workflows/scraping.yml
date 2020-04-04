@@ -1,0 +1,47 @@
+name: Scraping CI
+on:
+  repository_dispatch:
+    types: [test_trigger]
+  schedule:
+  - cron: '0 0-23 * * *'
+jobs:
+  scraping:
+    runs-on: ubuntu-latest
+    services:
+      selenium:
+        image: selenium/standalone-chrome:3.141.59-vanadium
+        ports:
+          - 4444:4444
+        volumes:
+          - /dev/shm:/dev/shm
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+          python-version: '3.7'
+    - name: Setup Poetry
+      uses: abatilo/actions-poetry@v1.5.0
+      
+    - name: Poetry Cache venv
+      uses: actions/cache@v1
+      with:
+          path: ~/.venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Set Poetry config
+      run: |
+          poetry config settings.virtualenvs.in-project false
+          poetry config settings.virtualenvs.path ~/.venv
+          
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: poetry install
+    
+    - name: Execute
+      env:
+        SELENIUM_HOST: localhost
+        TZ: Asia/Tokyo
+      run: |
+        poetry run ./Source/Scraping.py
