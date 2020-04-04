@@ -30,10 +30,7 @@ jobs:
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
 
-    - name: Set Poetry config
-      run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.venv
+ 
           
     - name: Install dependencies
       if: steps.cache.outputs.cache-hit != 'true'
