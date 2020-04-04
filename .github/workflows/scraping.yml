@@ -1,7 +1,5 @@
 name: Scraping CI
 on:
-  repository_dispatch:
-    types: [test_trigger]
   schedule:
   - cron: '0 0-23 * * *'
 jobs:
