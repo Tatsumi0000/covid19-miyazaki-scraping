@@ -2,8 +2,8 @@ name: Scraping CI
 on:
   push:
     branches: develop
-  schedule:
-  - cron: '0 0-23 * * *'
+  # schedule:
+  # - cron: '0 0-23 * * *'
 jobs:
   scraping:
     runs-on: ubuntu-latest
