@@ -1,9 +1,9 @@
 name: Scraping CI
 on:
-  push:
-    branches: develop
-  # schedule:
-  # - cron: '0 0-23 * * *'
+  repository_dispatch:
+    types: [test_trigger]
+  schedule:
+  - cron: '46 0-23 * * *'
 jobs:
   scraping:
     runs-on: ubuntu-latest
