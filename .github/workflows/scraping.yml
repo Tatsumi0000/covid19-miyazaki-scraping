@@ -1,4 +1,6 @@
 name: Scraping CI
+env:
+  TZ: 'Asia/Tokyo' 
 on:
   repository_dispatch:
     types: [test_trigger]
